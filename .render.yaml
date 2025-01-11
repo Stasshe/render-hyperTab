@@ -1,0 +1,4 @@
+services:
+  my-service:
+    buildCommand: npm install
+    startCommand: npm start
