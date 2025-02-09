@@ -1,35 +1,48 @@
-# Utopia
-Utopia Unblocker unblocks hundreds of millions of websites and bypasses web restrictions with ease.
+<!-- Notice for idiots -->
+# NOTICE:
 
-The most revolutionary proxy service out there, adding unprecendented technology and algorithms to circumvent blocks.
+You CANNOT deploy to Vercel, Netifly, GitHub Pages, or Cloudflare pages. They are static hosts, they just act as a web facing file system, you need the actual proxy for this to work.
 
-## Special Features
-These features can be enabled/disabled in the Settings page in Utopia:
- - Hidden Mode
-   - Utopia revolutionized the world by being the first ever website to have about:blank cloaking
-   - Hides everything you do with Utopia from your history and prevents extensions such as GoGuardian from seeing your screen
- - Anti-Closing
-   - Prevents extensions such as GoGuardian from closing the tab you're on
- - Tab Cloak
-   - Disguises the tab you're on as something else, such as Google Classroom, Drive, Gmail, etc.
- - Quick Links
-   - Access websites faster than ever with a click of a button
+<!--
+                                _     _                     _       _   _          _                               _    
+     /\                        | |   | |                   | |     | \ | |        | |                             | |   
+    /  \     _ __ ___     ___  | |_  | |__    _   _   ___  | |_    |  \| |   ___  | |_  __      __   ___    _ __  | | __
+   / /\ \   | '_ ` _ \   / _ \ | __| | '_ \  | | | | / __| | __|   | . ` |  / _ \ | __| \ \ /\ / /  / _ \  | '__| | |/ /
+  / ____ \  | | | | | | |  __/ | |_  | | | | | |_| | \__ \ | |_    | |\  | |  __/ | |_   \ V  V /  | (_) | | |    |   < 
+ /_/    \_\ |_| |_| |_|  \___|  \__| |_| |_|  \__, | |___/  \__|   |_| \_|  \___|  \__|   \_/\_/    \___/  |_|    |_|\_\
+                                               __/ |                                                                    
+                                              |___/                                                                     
+-->
+<!-- The font is called Big, if you are wondering -->
+<div align="center">
+         
+<img src="https://socialify.git.ci/amethystnetwork-dev/Hypertabs/image?font=Inter&forks=1&issues=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Famethystnetwork-dev%2FHypertabs%2Fmain%2Fstatic%2Ficon.png&name=1&owner=1&pattern=Solid&stargazers=1&theme=Light" alt="Hypertabs" width="640" height="320" />
 
-## Deployment
-Here are various deployment options to deploy Utopia on your own.
+<a href="" alt="Made with NodeJS"><img src="https://img.shields.io/badge/Made%20with-Node.JS-6DA55F?style=for-the-badge&logo=node.js&logoColor=white"></a> 
+<a href="https://github.com/amethystnetwork-dev/Hypertabs/graphs/contributors/" alt=""><img src="https://img.shields.io/github/contributors/amethystnetwork-dev/Hypertabs?style=for-the-badge"></a>
 
-[![Run on Replit](https://raw.githubusercontent.com/BinBashBanana/deploy-buttons/master/buttons/remade/replit.svg)](https://replit.com/github/UtopiaUnblocker/Utopia)
-<br>
-[![Deploy to Heroku](https://raw.githubusercontent.com/BinBashBanana/deploy-buttons/master/buttons/remade/heroku.svg)](https://heroku.com/deploy/?template=https://github.com/UtopiaUnblocker/Utopia)
-<br>
-[![Deploy to IBM Cloud](https://raw.githubusercontent.com/BinBashBanana/deploy-buttons/master/buttons/remade/ibmcloud.svg)](https://cloud.ibm.com/devops/setup/deploy?repository=https://github.com/UtopiaUnblocker/Utopia)
-<br>
-[![Deploy to Amplify Console](https://raw.githubusercontent.com/BinBashBanana/deploy-buttons/master/buttons/remade/amplifyconsole.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/UtopiaUnblocker/Utopia)
-<br>
-[![Run on Google Cloud](https://raw.githubusercontent.com/BinBashBanana/deploy-buttons/master/buttons/remade/googlecloud.svg)](https://deploy.cloud.run/?git_repo=https://github.com/UtopiaUnblocker/Utopia)
-<br>
-[![Remix on Glitch](https://binbashbanana.github.io/deploy-buttons/buttons/remade/glitch.svg)](https://glitch.com/edit/#!/import/github/UtopiaUnblocker/Utopia)
-<br>
-[![Deploy To Koyeb](https://binbashbanana.github.io/deploy-buttons/buttons/remade/koyeb.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/UtopiaUnblocker/Utopia&branch=main&name=Utopia)
+</div>
 
-If you would like to deploy Utopia but don't understand how to use these or need help, join our discord server here: https://discord.gg/hFZC5cgsmq
+<div align="center">
+    <h2>Get Started</h2>
+    <a>To get started, press one of the buttons below to deploy Hypertabs</a>
+    <br>
+    <br>
+    <a href="https://app.cyclic.sh/api/app/deploy/amethystnetwork-dev/Hypertabs"><img height="30px" src="https://img.shields.io/badge/cyclic-2e59c7.svg?style=for-the-badge&logo=cyclic&logoColor=white"><img></a>
+    <a href="https://render.com/deploy?repo=https://github.com/amethystnetwork-dev/Hypertabs"><img height="30px" src="https://img.shields.io/badge/render-4f65f1.svg?style=for-the-badge&logo=render&logoColor=46e3b7"><img></a>
+    <a href="https://amethystnetwork-dev.github.io/utils/deploy/heroku?repo=Hypertabs"><img height="30px" src="https://img.shields.io/badge/heroku-%23430098.svg?style=for-the-badge&logo=heroku&logoColor=white"><img></a>
+    <a href="https://amethystnetwork-dev.github.io/docs/about-replit?repo=Hypertabs"><img height="30px" src="https://amethystnetwork-dev.github.io/assets/replit.svg"><img></a>
+    <a href="https://railway.app/new/template/EBnCyy?referralCode=8zUUBB"><img height="30px" src="https://img.shields.io/badge/Railway-%234f0599.svg?style=for-the-badge&logo=railway&logoColor=white"><img></a>
+</div>
+
+## Discord Server
+
+Press the join button to join the server:
+
+[![Join us on Discord](https://invidget.switchblade.xyz/fzrmxgu2NR?theme=light)](https://discord.gg/fzrmxgu2NR)
+
+## Credits
+
+- [B3ATDROP3R](https://github.com/B3ATDROP3R)
+- [Caracal.js](https://github.com/caracal-js)
+- [luphoria](https://github.com/luphoria)

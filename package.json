@@ -1,28 +1,25 @@
 {
-  "name": "Utopia",
+  "name": "hypertabs",
   "version": "1.0.0",
-  "description": "Epic proxy",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "description": "Unofficial Hypertabs easy deployment version with TompHTTP bare server included.",
+  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
+  "files": ["static", "src", ".gitignore", "app.json", ".replit", "replit.nix", "Procfile"],
   "repository": {
     "type": "git",
-    "url": "git://github.com/EpicProgrammingPerson/Utopia-Beta.git"
+    "url": "git+https://github.com/amethystnetwork-dev/Hypertabs"
   },
-  "keywords": [],
+  "keywords": ["amethystnetwork-dev"],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@tomphttp/bare-server-node": "^1.2.2",
-    "acorn-hammerhead": "^0.5.0",
-    "css-tree": "^2.1.0",
-    "express": "^4.18.1",
-    "node-static": "^0.7.11",
-    "parse5": "^6.0.1",
-    "webpack": "^5.70.0"
-  }
+    "@tomphttp/bare-server-node": "1.0.4-deps1",
+    "serve-static": "^1.15.0"
+  },
+  "engines": {
+		"npm": ">=8.0.0",
+		"node": ">=18.0.0"
+	}
 }

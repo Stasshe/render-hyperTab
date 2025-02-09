@@ -1,5 +1,6 @@
 services:
   - type: web
-    name: math
-    env: docker
-    plan: free
+    name: hypertabs
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
