@@ -479,7 +479,7 @@ window.onbeforeunload = function () {
 };
 
 window.searchEngine =
-	localStorage.getItem('searchEngine') || 'https://search.brave.com/search?q=';
+	localStorage.getItem('searchEngine') || 'https://www.bing.com/search?q=';
 document.getElementById('customSearch').value = window.searchEngine;
 
 //bookmarks
