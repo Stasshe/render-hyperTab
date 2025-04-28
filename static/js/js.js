@@ -372,15 +372,15 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 	}
 
 	// 検索かURLかを判断して処理する
-	const result = BingSearchHandler.handleSearch(URL_BAR.value);
+	const result = WebNavigation.handleSearch(URL_BAR.value);
 	
-	if (result.isUrl) {
-		// URLの場合は標準処理
+	if (result.type === 'address') {
+		// Webアドレスの場合は標準処理
 		let value = '//' + location.host + __uv$config.prefix + xor.encode(result.url);
 		document.getElementById(getActiveFrameId()).src = value;
 		addPageToHistory(getActiveFrameId(), value);
 	} else {
-		// 検索クエリの場合はDOM解析して表示
+		// 検索クエリの場合はカスタムページ表示
 		const activeFrameId = getActiveFrameId();
 		const targetFrame = document.getElementById(activeFrameId).contentWindow;
 		
@@ -391,7 +391,7 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 		frameDoc.write(`
 			<html>
 				<head>
-					<title>検索中...</title>
+					<title>読み込み中...</title>
 					<style>
 						body {
 							font-family: Arial, sans-serif;
@@ -432,14 +432,14 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 		
 		// 検索実行
 		setTimeout(async () => {
-			await BingSearchHandler.performBingSearch(result.searchQuery, targetFrame);
+			await WebNavigation.performSearch(result.query, targetFrame);
 			
 			// タブのタイトルを設定
 			document.getElementsByClassName(activeFrameId)[0].firstChild.data = 
-				`${result.searchQuery} - 検索結果`;
+				`${result.query} - 検索結果`;
 				
 			// 履歴に追加
-			addPageToHistory(activeFrameId, `検索: ${result.searchQuery}`);
+			addPageToHistory(activeFrameId, `検索: ${result.query}`);
 		}, 100);
 	}
 
