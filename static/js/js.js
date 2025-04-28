@@ -380,9 +380,67 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 		document.getElementById(getActiveFrameId()).src = value;
 		addPageToHistory(getActiveFrameId(), value);
 	} else {
-		// 検索クエリの場合は直接Bingを使用
-		document.getElementById(getActiveFrameId()).src = result.bingUrl;
-		addPageToHistory(getActiveFrameId(), result.bingUrl);
+		// 検索クエリの場合はDOM解析して表示
+		const activeFrameId = getActiveFrameId();
+		const targetFrame = document.getElementById(activeFrameId).contentWindow;
+		
+		// ロード中表示
+		document.getElementById(activeFrameId).src = 'about:blank';
+		const frameDoc = document.getElementById(activeFrameId).contentDocument;
+		frameDoc.open();
+		frameDoc.write(`
+			<html>
+				<head>
+					<title>検索中...</title>
+					<style>
+						body {
+							font-family: Arial, sans-serif;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							height: 100vh;
+							margin: 0;
+							background-color: #f5f5f5;
+						}
+						.loading {
+							text-align: center;
+						}
+						.spinner {
+							border: 4px solid rgba(0, 0, 0, 0.1);
+							border-left-color: #7986cb;
+							border-radius: 50%;
+							width: 40px;
+							height: 40px;
+							animation: spin 1s linear infinite;
+							margin: 20px auto;
+						}
+						@keyframes spin {
+							0% { transform: rotate(0deg); }
+							100% { transform: rotate(360deg); }
+						}
+					</style>
+				</head>
+				<body>
+					<div class="loading">
+						<div class="spinner"></div>
+						<p>検索結果を読み込み中...</p>
+					</div>
+				</body>
+			</html>
+		`);
+		frameDoc.close();
+		
+		// 検索実行
+		setTimeout(async () => {
+			await BingSearchHandler.performBingSearch(result.searchQuery, targetFrame);
+			
+			// タブのタイトルを設定
+			document.getElementsByClassName(activeFrameId)[0].firstChild.data = 
+				`${result.searchQuery} - 検索結果`;
+				
+			// 履歴に追加
+			addPageToHistory(activeFrameId, `検索: ${result.searchQuery}`);
+		}, 100);
 	}
 
 	event.preventDefault();

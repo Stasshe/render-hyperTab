@@ -1,6 +1,6 @@
 /*
  * カスタム検索機能
- * 検索クエリをBingで検索するハンドラー
+ * 検索クエリをBingで検索して結果をカスタム表示
  */
 
 // URLかどうかを判定する関数
@@ -58,18 +58,93 @@ function handleSearch(query) {
   }
 }
 
-// Bingで検索実行
-async function performBingSearch(query, targetFrame) {
+// BareServerを使用してBingの検索結果を取得して表示する処理
+async function fetchAndDisplayBingResults(query, targetFrame) {
   const bingUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(query);
   
   try {
-    // 検索結果をフレームに表示
-    if (targetFrame) {
-      targetFrame.location.href = bingUrl;
+    // BareServerを使用してbingの検索結果を取得
+    const bareClient = new BareClient(__uv$config.bare);
+    const response = await bareClient.fetch(bingUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error('検索結果の取得に失敗しました');
+      return false;
     }
+    
+    const html = await response.text();
+    
+    // 検索結果をパースしてiframeに表示
+    if (targetFrame) {
+      const doc = targetFrame.document;
+      doc.open();
+      doc.write(html);
+      
+      // スタイルを調整するスクリプトを追加
+      doc.write(`
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+          }
+          .b_searchboxForm {
+            display: none !important;
+          }
+        </style>
+      `);
+      
+      doc.close();
+      
+      // リンクをクリック時に現在のタブ内で開くように処理
+      const links = doc.querySelectorAll('a');
+      links.forEach(link => {
+        if (link.href && !link.href.startsWith('javascript:')) {
+          link.setAttribute('target', '_self');
+          const originalHref = link.href;
+          
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = originalHref;
+            // URLをフォーマットしてタブ内で表示
+            if (isValidURL(url)) {
+              targetFrame.location.href = __uv$config.prefix + xor.encode(url);
+            }
+            return false;
+          });
+        }
+      });
+    }
+    
     return true;
   } catch (error) {
-    console.error('検索中にエラーが発生しました:', error);
+    console.error('検索結果の取得中にエラーが発生しました:', error);
+    console.log(error);
+    
+    // エラー時はフォールバックとして標準的なUVpを使用
+    if (targetFrame) {
+      const encodedUrl = __uv$config.prefix + xor.encode(bingUrl);
+      targetFrame.location.href = encodedUrl;
+    }
+    return false;
+  }
+}
+
+// 検索処理実行
+async function performBingSearch(query, targetFrame) {
+  try {
+    // BareServerを使用してDOM解析して表示
+    return await fetchAndDisplayBingResults(query, targetFrame);
+  } catch (error) {
+    console.error('検索処理中にエラーが発生しました:', error);
+    // エラー時はフォールバックとして標準的なUVpを使用
+    if (targetFrame) {
+      const bingUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(query);
+      const encodedUrl = __uv$config.prefix + xor.encode(bingUrl);
+      targetFrame.location.href = encodedUrl;
+    }
     return false;
   }
 }
@@ -91,6 +166,7 @@ function processUrlBarInput(inputValue) {
 window.BingSearchHandler = {
   handleSearch,
   performBingSearch,
+  fetchAndDisplayBingResults,
   processUrlBarInput,
   isValidURL
 };

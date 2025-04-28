@@ -31,14 +31,44 @@
 			// const ip = "<?php echo $_SERVER['HTTP_X_FORWARDED_FOR'] ?>";
 			
 			// 検索実行関数
-			function performSearch() {
+			async function performSearch() {
 				var inputValue = document.getElementById('inputb').value;
 				var searchResult = BingSearchHandler.handleSearch(inputValue);
 				
 				if (searchResult.isUrl) {
+					// URLの場合は通常処理
 					location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
 				} else {
-					location.href = searchResult.bingUrl;
+					// 検索クエリの場合はカスタム処理
+					// ローディング表示
+					document.body.innerHTML = `
+						<div style="display:flex;justify-content:center;align-items:center;height:100vh;text-align:center;background:#f5f5f5;">
+							<div>
+								<div style="border:4px solid rgba(0,0,0,0.1);border-left-color:#7986cb;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;"></div>
+								<p>「${searchResult.searchQuery}」の検索結果を読み込み中...</p>
+								<style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
+							</div>
+						</div>
+					`;
+					
+					// カスタムの検索ページを作成
+					var iframe = document.createElement('iframe');
+					iframe.style.position = 'fixed';
+					iframe.style.top = '0';
+					iframe.style.left = '0';
+					iframe.style.width = '100%';
+					iframe.style.height = '100%';
+					iframe.style.border = 'none';
+					iframe.style.zIndex = '1000';
+					iframe.style.background = '#fff';
+					
+					document.body.appendChild(iframe);
+					
+					// 少し待機してからBing検索を実行
+					setTimeout(async () => {
+						await BingSearchHandler.performBingSearch(searchResult.searchQuery, iframe.contentWindow);
+						document.title = `${searchResult.searchQuery} - 検索結果`;
+					}, 100);
 				}
 			}
 		</script>
