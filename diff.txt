@@ -1,0 +1,523 @@
+diff --git a/f.txt b/f.txt
+new file mode 100644
+index 0000000..245e6a4
+--- /dev/null
++++ b/f.txt
+@@ -0,0 +1 @@
++Renderでブロックされるようになってしまった。
+\ No newline at end of file
+diff --git a/static/index.html b/static/index.html
+index f0ab73a..64e2dad 100644
+--- a/static/index.html
++++ b/static/index.html
+@@ -33,6 +33,7 @@
+   <script src="/uv/uv.bundle.js"></script>
+   <script src="/uv/uv.config.js"></script>
+   <script src="/bare-client.js"></script>
++  <script src='/js/search/bin.js'></script>
+   <script>
+     if ('serviceWorker' in navigator) {
+ 		navigator.serviceWorker.register('/uv/sw.js', {
+diff --git a/static/internal/newTab/main.html b/static/internal/newTab/main.html
+index 3a6a752..5c77c5b 100644
+--- a/static/internal/newTab/main.html
++++ b/static/internal/newTab/main.html
+@@ -25,9 +25,52 @@
+ 		<script src="/js/bookmarks.js"></script>
+ 		<script src="/uv/uv.bundle.js"></script>
+ 		<script src="/uv/uv.config.js"></script>
++		<script src="/js/search/bin.js"></script>
+ 		<!-- <script src="/js/weather.js"></script> -->
+ 		<script>
+ 			// const ip = "<?php echo $_SERVER['HTTP_X_FORWARDED_FOR'] ?>";
++			
++			// 検索実行関数
++			async function performSearch() {
++				var inputValue = document.getElementById('inputb').value;
++				var searchResult = BingSearchHandler.handleSearch(inputValue);
++				
++				if (searchResult.isUrl) {
++					// URLの場合は通常処理
++					location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
++				} else {
++					// 検索クエリの場合はカスタム処理
++					// ローディング表示
++					document.body.innerHTML = `
++						<div style="display:flex;justify-content:center;align-items:center;height:100vh;text-align:center;background:#f5f5f5;">
++							<div>
++								<div style="border:4px solid rgba(0,0,0,0.1);border-left-color:#7986cb;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;"></div>
++								<p>「${searchResult.searchQuery}」の検索結果を読み込み中...</p>
++								<style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
++							</div>
++						</div>
++					`;
++					
++					// カスタムの検索ページを作成
++					var iframe = document.createElement('iframe');
++					iframe.style.position = 'fixed';
++					iframe.style.top = '0';
++					iframe.style.left = '0';
++					iframe.style.width = '100%';
++					iframe.style.height = '100%';
++					iframe.style.border = 'none';
++					iframe.style.zIndex = '1000';
++					iframe.style.background = '#fff';
++					
++					document.body.appendChild(iframe);
++					
++					// 少し待機してからBing検索を実行
++					setTimeout(async () => {
++						await BingSearchHandler.performBingSearch(searchResult.searchQuery, iframe.contentWindow);
++						document.title = `${searchResult.searchQuery} - 検索結果`;
++					}, 100);
++				}
++			}
+ 		</script>
+ 		<div class="bookmarks"></div>
+ 		<div class="info">
+@@ -42,13 +85,13 @@
+ 			<h1 id="headtxt">Hypertabs</h1>
+ 			<forum
+ 				id="input"
+-				onkeydown="if(event.key == 'Enter'){location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`}"
+-				onsubmit="location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`"
++				onkeydown="if(event.key == 'Enter'){ performSearch(); }"
++				onsubmit="performSearch(); return false;"
+ 			>
+ 				<input id="inputb" placeholder="Search....." />
+ 				<input
+ 					id="inputimg"
+-					onclick="location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`"
++					onclick="performSearch();"
+ 					type="image"
+ 					value="Login"
+ 					src="/search.svg"
+diff --git a/static/js/js.js b/static/js/js.js
+index 363af37..02aeba7 100644
+--- a/static/js/js.js
++++ b/static/js/js.js
+@@ -129,7 +129,7 @@ async function getIcon(id) {
+ }
+ // Sets tab information
+ async function setInfo(frameId) {
+-	//if the site we are on is not proxied.
++	// タブ情報の設定
+ 	CONTENT_WINDOW(frameId).addEventListener('keydown', function (key) {
+ 		if (key.ctrlKey) {
+ 			if (
+@@ -154,13 +154,13 @@ async function setInfo(frameId) {
+ 	});
+ 	URL_BAR.value = '';
+ 	if (!CONTENT_WINDOW(frameId).location.href.includes(__uv$config.prefix)) {
+-		//do this for history then return..
++		// 履歴への追加処理
+ 		addPageToHistory(frameId, CONTENT_WINDOW(frameId).location.href);
+ 		return;
+ 	}
+-	//get current page url.
++	// 現在のページURLの取得
+ 	let regUrl = CONTENT_WINDOW(frameId).location.href;
+-	//grabbing title stuff (corrosion sucks with this)
++	// タイトル情報の取得
+ 	if (
+ 		CONTENT_WINDOW(frameId).document.getElementsByTagName('title')[0].firstChild
+ 			.textContent
+@@ -173,13 +173,13 @@ async function setInfo(frameId) {
+ 		document.getElementsByClassName(frameId)[0].firstChild.data = xor.decode(
+ 			regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
+ 		);
+-	//set url bar
++	// URLバーの設定
+ 	if (getActiveFrameId() == frameId) {
+ 		URL_BAR.value = xor.decode(
+ 			regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
+ 		);
+ 	}
+-	// set the favicon of page
++	// ファビコン設定
+ 	document.querySelector(
+ 		`div[ifd="${+frameId - 1}"]`
+ 	).children[2].children[0].attributes[1].value = `background-image: url(${await getIcon(
+@@ -192,7 +192,7 @@ async function setInfo(frameId) {
+ 	) {
+ 		chromeTabs.pinTab(+frameId - 1);
+ 	}
+-	// add the page to local history
++	// ローカル履歴に追加
+ 	addPageToHistory(frameId, ACTIVE_WINDOW().location.href);
+ }
+ function hideId(...x) {
+@@ -241,11 +241,11 @@ function inspect() {
+ }
+ 
+ function opencity(frame) {
+-	// creates the actual frame inside the hypertab!
+-	let proxyFrames = document.getElementsByClassName('iframething');
++	// タブフレームの表示処理
++	let frames = document.getElementsByClassName('iframething');
+ 
+-	for (let iframeIndex = 0; iframeIndex < proxyFrames.length; iframeIndex++)
+-		proxyFrames[iframeIndex].style.display = 'none';
++	for (let iframeIndex = 0; iframeIndex < frames.length; iframeIndex++)
++		frames[iframeIndex].style.display = 'none';
+ 
+ 	document.getElementById(frame).style = 'display:inline; background: #FFFFFF';
+ 	document.getElementById(frame).focus();
+@@ -254,7 +254,7 @@ function opencity(frame) {
+ 	URL_BAR.value = xor.decode(
+ 		regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
+ 	);
+-	// listen for attribute changes with soon to be favicon (not done)
++	// ファビコン変更の監視 (未完成)
+ }
+ function skipAd() {
+ 	while (
+@@ -328,7 +328,7 @@ let tabNum = 2; // 0 and 1 are reserved for the GUI
+ let ctxTab = 1;
+ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
+ 	if (event.key !== 'Enter') {
+-		// suggest searches
++		// サジェスト検索
+ 		try {
+ 			bare
+ 				.fetch(`https://duckduckgo.com/ac/?q=${URL_BAR.value}`)
+@@ -345,7 +345,7 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
+ 		} catch {}
+ 		return;
+ 	}
+-	// if user is entering a new URL!
++	// ユーザーが新しいURLを入力した場合
+ 	URL_BAR.blur();
+ 	if (URL_BAR.value.startsWith('javascript:')) {
+ 		try {
+@@ -370,30 +370,77 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
+ 		document.getElementById(getActiveFrameId()).src = value;
+ 		return;
+ 	}
+-	if (!URL_BAR.value.includes('.') || URL_BAR.value.includes(' ')) {
+-		value =
+-			'//' +
+-			location.host +
+-			__uv$config.prefix +
+-			xor.encode(window.searchEngine + encodeURIComponent(URL_BAR.value));
++
++	// 検索かURLかを判断して処理する
++	const result = BingSearchHandler.handleSearch(URL_BAR.value);
++	
++	if (result.isUrl) {
++		// URLの場合は標準処理
++		let value = '//' + location.host + __uv$config.prefix + xor.encode(result.url);
+ 		document.getElementById(getActiveFrameId()).src = value;
+ 		addPageToHistory(getActiveFrameId(), value);
+-		return;
+-	}
+-	if (
+-		!URL_BAR.value.startsWith('http://') &&
+-		!URL_BAR.value.startsWith('https://')
+-	) {
+-		value =
+-			'//' +
+-			location.host +
+-			__uv$config.prefix +
+-			xor.encode('http://' + URL_BAR.value);
+-		document.getElementById(getActiveFrameId()).src = value;
+ 	} else {
+-		value =
+-			'//' + location.host + __uv$config.prefix + xor.encode(URL_BAR.value);
+-		document.getElementById(getActiveFrameId()).src = value;
++		// 検索クエリの場合はDOM解析して表示
++		const activeFrameId = getActiveFrameId();
++		const targetFrame = document.getElementById(activeFrameId).contentWindow;
++		
++		// ロード中表示
++		document.getElementById(activeFrameId).src = 'about:blank';
++		const frameDoc = document.getElementById(activeFrameId).contentDocument;
++		frameDoc.open();
++		frameDoc.write(`
++			<html>
++				<head>
++					<title>検索中...</title>
++					<style>
++						body {
++							font-family: Arial, sans-serif;
++							display: flex;
++							justify-content: center;
++							align-items: center;
++							height: 100vh;
++							margin: 0;
++							background-color: #f5f5f5;
++						}
++						.loading {
++							text-align: center;
++						}
++						.spinner {
++							border: 4px solid rgba(0, 0, 0, 0.1);
++							border-left-color: #7986cb;
++							border-radius: 50%;
++							width: 40px;
++							height: 40px;
++							animation: spin 1s linear infinite;
++							margin: 20px auto;
++						}
++						@keyframes spin {
++							0% { transform: rotate(0deg); }
++							100% { transform: rotate(360deg); }
++						}
++					</style>
++				</head>
++				<body>
++					<div class="loading">
++						<div class="spinner"></div>
++						<p>検索結果を読み込み中...</p>
++					</div>
++				</body>
++			</html>
++		`);
++		frameDoc.close();
++		
++		// 検索実行
++		setTimeout(async () => {
++			await BingSearchHandler.performBingSearch(result.searchQuery, targetFrame);
++			
++			// タブのタイトルを設定
++			document.getElementsByClassName(activeFrameId)[0].firstChild.data = 
++				`${result.searchQuery} - 検索結果`;
++				
++			// 履歴に追加
++			addPageToHistory(activeFrameId, `検索: ${result.searchQuery}`);
++		}, 100);
+ 	}
+ 
+ 	event.preventDefault();
+diff --git a/static/js/search/bin.js b/static/js/search/bin.js
+new file mode 100644
+index 0000000..b22c28a
+--- /dev/null
++++ b/static/js/search/bin.js
+@@ -0,0 +1,225 @@
++/*
++ * 検索支援ツール
++ * 入力をWebブラウズまたは検索に振り分ける
++ */
++
++// URLかどうかを判定する関数
++function isValidURL(string) {
++  try {
++    // スキームがない場合は処理
++    if (!string.match(/^[a-zA-Z]+:\/\//)) {
++      // 一般的なドメイン形式をチェック (.com, .net, .org, .jpなど)
++      if (string.match(/^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)*/)) {
++        return true;
++      }
++      // IPアドレスチェック
++      if (string.match(/^(\d{1,3}\.){3}\d{1,3}(:.+)?(\/.*)*$/)) {
++        return true;
++      }
++      return false;
++    }
++    new URL(string);
++    return true;
++  } catch (_) {
++    return false;
++  }
++}
++
++// 検索クエリかURLかを判断して適切にハンドリングする
++function handleSearch(query) {
++  // 空の場合は何もしない
++  if (!query || query.trim() === '') return;
++  
++  // 特殊なHTプロトコルの場合は通常通り処理
++  if (query.startsWith('ht://')) {
++    return {
++      isUrl: true,
++      url: query
++    };
++  }
++  
++  // URLかどうかをチェック
++  if (isValidURL(query)) {
++    // URLの場合、https://がない場合は追加
++    if (!query.match(/^[a-zA-Z]+:\/\//)) {
++      query = 'https://' + query;
++    }
++    return {
++      isUrl: true,
++      url: query
++    };
++  } else {
++    // 検索クエリの場合
++    return {
++      isUrl: false,
++      searchQuery: query,
++      bingUrl: 'https://www.bing.com/search?q=' + encodeURIComponent(query)
++    };
++  }
++}
++
++// 検索結果ページを生成・表示
++function generateSearchResults(query, targetFrame) {
++  if (!targetFrame) return false;
++  
++  const bingUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(query);
++  const googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(query);
++  
++  // カスタム検索結果ページを表示
++  const doc = targetFrame.document;
++  doc.open();
++  doc.write(`
++    <html>
++      <head>
++        <title>${query} - 検索結果</title>
++        <style>
++          body {
++            font-family: 'Segoe UI', Arial, sans-serif;
++            margin: 0;
++            padding: 20px;
++            background-color: #fff;
++          }
++          .search-container {
++            max-width: 850px;
++            margin: 0 auto;
++          }
++          .search-header {
++            display: flex;
++            align-items: center;
++            margin-bottom: 20px;
++          }
++          .search-logo {
++            width: 120px;
++            margin-right: 20px;
++          }
++          .search-box {
++            flex-grow: 1;
++            padding: 10px;
++            border: 1px solid #ddd;
++            border-radius: 24px;
++            font-size: 16px;
++            width: 100%;
++          }
++          .search-buttons {
++            margin-top: 15px;
++            display: flex;
++            gap: 10px;
++          }
++          .search-btn {
++            background-color: #f8f9fa;
++            border: 1px solid #dadce0;
++            border-radius: 4px;
++            color: #3c4043;
++            font-size: 14px;
++            padding: 8px 16px;
++            cursor: pointer;
++          }
++          .footer {
++            margin-top: 30px;
++            text-align: center;
++            color: #70757a;
++            font-size: 14px;
++          }
++          .search-options {
++            background: #f8f9fa;
++            border-radius: 8px;
++            padding: 15px;
++            margin: 20px 0;
++          }
++          .search-options h3 {
++            margin-top: 0;
++          }
++          .option-btn {
++            background-color: #fff;
++            border: 1px solid #dadce0;
++            border-radius: 4px;
++            color: #1a73e8;
++            font-size: 14px;
++            margin: 5px;
++            padding: 8px 16px;
++            cursor: pointer;
++          }
++        </style>
++      </head>
++      <body>
++        <div class="search-container">
++          <div class="search-header">
++            <div style="font-size: 24px; font-weight: bold; color: #4285f4;">検索</div>
++            <input type="text" class="search-box" value="${query}" id="searchInput">
++          </div>
++          
++          <div class="search-options">
++            <h3>検索オプション</h3>
++            <p>選択した検索エンジンで「${query}」を検索します：</p>
++            <button class="option-btn" id="bingBtn">Bingで検索</button>
++            <button class="option-btn" id="googleBtn">Googleで検索</button>
++          </div>
++          
++          <div class="footer">
++            <p>© ${new Date().getFullYear()}</p>
++            <p>プライバシーポリシー・利用規約</p>
++          </div>
++        </div>
++        
++        <script>
++          // 検索ボックスでEnterキーを押した時の処理
++          document.getElementById('searchInput').addEventListener('keydown', function(e) {
++            if (e.key === 'Enter') {
++              e.preventDefault();
++              window.location.href = '${__uv$config.prefix}${xor.encode(bingUrl)}';
++            }
++          });
++          
++          // 検索ボタンのイベント処理
++          document.getElementById('bingBtn').addEventListener('click', function() {
++            window.location.href = '${__uv$config.prefix}${xor.encode(bingUrl)}';
++          });
++          
++          document.getElementById('googleBtn').addEventListener('click', function() {
++            window.location.href = '${__uv$config.prefix}${xor.encode(googleUrl)}';
++          });
++        </script>
++      </body>
++    </html>
++  `);
++  doc.close();
++  
++  return true;
++}
++
++// 検索処理実行
++function performBingSearch(query, targetFrame) {
++  try {
++    // カスタム検索結果ページを表示
++    return generateSearchResults(query, targetFrame);
++  } catch (error) {
++    console.error('検索処理中にエラーが発生しました:', error);
++    // エラー時はフォールバック
++    if (targetFrame) {
++      const bingUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(query);
++      targetFrame.location.href = __uv$config.prefix + xor.encode(bingUrl);
++    }
++    return false;
++  }
++}
++
++// URLバーの入力処理
++function processUrlBarInput(inputValue) {
++  const result = handleSearch(inputValue);
++  
++  if (result.isUrl) {
++    // URL処理
++    return `${__uv$config.prefix}${xor.encode(result.url)}`;
++  } else {
++    // 検索クエリ処理
++    return result.bingUrl;
++  }
++}
++
++// エクスポート
++window.BingSearchHandler = {
++  handleSearch,
++  performBingSearch,
++  processUrlBarInput,
++  isValidURL
++};
+\ No newline at end of file
