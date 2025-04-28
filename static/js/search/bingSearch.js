@@ -79,7 +79,7 @@ function processUrlBarInput(inputValue) {
   const result = handleSearch(inputValue);
   
   if (result.isUrl) {
-    // URLの場合はUVプロキシを使用
+    
     return `${__uv$config.prefix}${xor.encode(result.url)}`;
   } else {
     // 検索クエリの場合は直接Bingを使用

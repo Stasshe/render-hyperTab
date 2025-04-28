@@ -375,7 +375,7 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 	const result = BingSearchHandler.handleSearch(URL_BAR.value);
 	
 	if (result.isUrl) {
-		// URLの場合はUVプロキシを使用
+		
 		let value = '//' + location.host + __uv$config.prefix + xor.encode(result.url);
 		document.getElementById(getActiveFrameId()).src = value;
 		addPageToHistory(getActiveFrameId(), value);
