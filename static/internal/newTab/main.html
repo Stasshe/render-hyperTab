@@ -29,6 +29,18 @@
 		<!-- <script src="/js/weather.js"></script> -->
 		<script>
 			// const ip = "<?php echo $_SERVER['HTTP_X_FORWARDED_FOR'] ?>";
+			
+			// 検索実行関数
+			function performSearch() {
+				var inputValue = document.getElementById('inputb').value;
+				var searchResult = BingSearchHandler.handleSearch(inputValue);
+				
+				if (searchResult.isUrl) {
+					location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
+				} else {
+					location.href = searchResult.bingUrl;
+				}
+			}
 		</script>
 		<div class="bookmarks"></div>
 		<div class="info">
@@ -43,41 +55,13 @@
 			<h1 id="headtxt">Hypertabs</h1>
 			<forum
 				id="input"
-				onkeydown="if(event.key == 'Enter'){
-					const inputValue = document.getElementById('inputb').value;
-					const searchResult = BingSearchHandler.handleSearch(inputValue);
-					
-					if (searchResult.isUrl) {
-						location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
-					} else {
-						location.href = searchResult.bingUrl;
-					}
-				}"
-				onsubmit="
-					const inputValue = document.getElementById('inputb').value;
-					const searchResult = BingSearchHandler.handleSearch(inputValue);
-					
-					if (searchResult.isUrl) {
-						location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
-					} else {
-						location.href = searchResult.bingUrl;
-					}
-					return false;
-				"
+				onkeydown="if(event.key == 'Enter'){ performSearch(); }"
+				onsubmit="performSearch(); return false;"
 			>
 				<input id="inputb" placeholder="Search....." />
 				<input
 					id="inputimg"
-					onclick="
-						const inputValue = document.getElementById('inputb').value;
-						const searchResult = BingSearchHandler.handleSearch(inputValue);
-						
-						if (searchResult.isUrl) {
-							location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
-						} else {
-							location.href = searchResult.bingUrl;
-						}
-					"
+					onclick="performSearch();"
 					type="image"
 					value="Login"
 					src="/search.svg"
