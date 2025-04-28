@@ -370,30 +370,19 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 		document.getElementById(getActiveFrameId()).src = value;
 		return;
 	}
-	if (!URL_BAR.value.includes('.') || URL_BAR.value.includes(' ')) {
-		value =
-			'//' +
-			location.host +
-			__uv$config.prefix +
-			xor.encode(window.searchEngine + encodeURIComponent(URL_BAR.value));
+
+	// 検索かURLかを判断して処理する
+	const result = BingSearchHandler.handleSearch(URL_BAR.value);
+	
+	if (result.isUrl) {
+		// URLの場合はUVプロキシを使用
+		let value = '//' + location.host + __uv$config.prefix + xor.encode(result.url);
 		document.getElementById(getActiveFrameId()).src = value;
 		addPageToHistory(getActiveFrameId(), value);
-		return;
-	}
-	if (
-		!URL_BAR.value.startsWith('http://') &&
-		!URL_BAR.value.startsWith('https://')
-	) {
-		value =
-			'//' +
-			location.host +
-			__uv$config.prefix +
-			xor.encode('http://' + URL_BAR.value);
-		document.getElementById(getActiveFrameId()).src = value;
 	} else {
-		value =
-			'//' + location.host + __uv$config.prefix + xor.encode(URL_BAR.value);
-		document.getElementById(getActiveFrameId()).src = value;
+		// 検索クエリの場合は直接Bingを使用
+		document.getElementById(getActiveFrameId()).src = result.bingUrl;
+		addPageToHistory(getActiveFrameId(), result.bingUrl);
 	}
 
 	event.preventDefault();

@@ -25,6 +25,7 @@
 		<script src="/js/bookmarks.js"></script>
 		<script src="/uv/uv.bundle.js"></script>
 		<script src="/uv/uv.config.js"></script>
+		<script src="/js/search/bingSearch.js"></script>
 		<!-- <script src="/js/weather.js"></script> -->
 		<script>
 			// const ip = "<?php echo $_SERVER['HTTP_X_FORWARDED_FOR'] ?>";
@@ -42,13 +43,41 @@
 			<h1 id="headtxt">Hypertabs</h1>
 			<forum
 				id="input"
-				onkeydown="if(event.key == 'Enter'){location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`}"
-				onsubmit="location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`"
+				onkeydown="if(event.key == 'Enter'){
+					const inputValue = document.getElementById('inputb').value;
+					const searchResult = BingSearchHandler.handleSearch(inputValue);
+					
+					if (searchResult.isUrl) {
+						location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
+					} else {
+						location.href = searchResult.bingUrl;
+					}
+				}"
+				onsubmit="
+					const inputValue = document.getElementById('inputb').value;
+					const searchResult = BingSearchHandler.handleSearch(inputValue);
+					
+					if (searchResult.isUrl) {
+						location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
+					} else {
+						location.href = searchResult.bingUrl;
+					}
+					return false;
+				"
 			>
 				<input id="inputb" placeholder="Search....." />
 				<input
 					id="inputimg"
-					onclick="location.href=`${__uv$config.prefix}${xor.encode(window.parent.searchEngine+document.getElementById('inputb').value)}`"
+					onclick="
+						const inputValue = document.getElementById('inputb').value;
+						const searchResult = BingSearchHandler.handleSearch(inputValue);
+						
+						if (searchResult.isUrl) {
+							location.href=`${__uv$config.prefix}${xor.encode(searchResult.url)}`;
+						} else {
+							location.href = searchResult.bingUrl;
+						}
+					"
 					type="image"
 					value="Login"
 					src="/search.svg"
