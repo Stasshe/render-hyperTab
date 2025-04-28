@@ -1,6 +1,6 @@
 /*
- * カスタムBing検索ハンドラ
- * 検索クエリをBingで検索し、結果をカスタム表示する
+ * カスタム検索機能
+ * 検索クエリをBingで検索するハンドラー
  */
 
 // URLかどうかを判定する関数
@@ -58,18 +58,18 @@ function handleSearch(query) {
   }
 }
 
-// Bingから検索結果を取得して表示
+// Bingで検索実行
 async function performBingSearch(query, targetFrame) {
   const bingUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(query);
   
   try {
-    // フレームをBingの検索結果にリダイレクト (直接アクセス)
+    // 検索結果をフレームに表示
     if (targetFrame) {
       targetFrame.location.href = bingUrl;
     }
     return true;
   } catch (error) {
-    console.error('Bing検索中にエラーが発生しました:', error);
+    console.error('検索中にエラーが発生しました:', error);
     return false;
   }
 }
@@ -79,10 +79,10 @@ function processUrlBarInput(inputValue) {
   const result = handleSearch(inputValue);
   
   if (result.isUrl) {
-    
+    // URL処理
     return `${__uv$config.prefix}${xor.encode(result.url)}`;
   } else {
-    // 検索クエリの場合は直接Bingを使用
+    // 検索クエリ処理
     return result.bingUrl;
   }
 }

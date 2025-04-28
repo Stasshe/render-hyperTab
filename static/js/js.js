@@ -129,7 +129,7 @@ async function getIcon(id) {
 }
 // Sets tab information
 async function setInfo(frameId) {
-	//if the site we are on is not proxied.
+	// タブ情報の設定
 	CONTENT_WINDOW(frameId).addEventListener('keydown', function (key) {
 		if (key.ctrlKey) {
 			if (
@@ -154,13 +154,13 @@ async function setInfo(frameId) {
 	});
 	URL_BAR.value = '';
 	if (!CONTENT_WINDOW(frameId).location.href.includes(__uv$config.prefix)) {
-		//do this for history then return..
+		// 履歴への追加処理
 		addPageToHistory(frameId, CONTENT_WINDOW(frameId).location.href);
 		return;
 	}
-	//get current page url.
+	// 現在のページURLの取得
 	let regUrl = CONTENT_WINDOW(frameId).location.href;
-	//grabbing title stuff (corrosion sucks with this)
+	// タイトル情報の取得
 	if (
 		CONTENT_WINDOW(frameId).document.getElementsByTagName('title')[0].firstChild
 			.textContent
@@ -173,13 +173,13 @@ async function setInfo(frameId) {
 		document.getElementsByClassName(frameId)[0].firstChild.data = xor.decode(
 			regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
 		);
-	//set url bar
+	// URLバーの設定
 	if (getActiveFrameId() == frameId) {
 		URL_BAR.value = xor.decode(
 			regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
 		);
 	}
-	// set the favicon of page
+	// ファビコン設定
 	document.querySelector(
 		`div[ifd="${+frameId - 1}"]`
 	).children[2].children[0].attributes[1].value = `background-image: url(${await getIcon(
@@ -192,7 +192,7 @@ async function setInfo(frameId) {
 	) {
 		chromeTabs.pinTab(+frameId - 1);
 	}
-	// add the page to local history
+	// ローカル履歴に追加
 	addPageToHistory(frameId, ACTIVE_WINDOW().location.href);
 }
 function hideId(...x) {
@@ -241,11 +241,11 @@ function inspect() {
 }
 
 function opencity(frame) {
-	// creates the actual frame inside the hypertab!
-	let proxyFrames = document.getElementsByClassName('iframething');
+	// タブフレームの表示処理
+	let frames = document.getElementsByClassName('iframething');
 
-	for (let iframeIndex = 0; iframeIndex < proxyFrames.length; iframeIndex++)
-		proxyFrames[iframeIndex].style.display = 'none';
+	for (let iframeIndex = 0; iframeIndex < frames.length; iframeIndex++)
+		frames[iframeIndex].style.display = 'none';
 
 	document.getElementById(frame).style = 'display:inline; background: #FFFFFF';
 	document.getElementById(frame).focus();
@@ -254,7 +254,7 @@ function opencity(frame) {
 	URL_BAR.value = xor.decode(
 		regUrl.split(__uv$config.prefix).slice(1).join(__uv$config.prefix)
 	);
-	// listen for attribute changes with soon to be favicon (not done)
+	// ファビコン変更の監視 (未完成)
 }
 function skipAd() {
 	while (
@@ -328,7 +328,7 @@ let tabNum = 2; // 0 and 1 are reserved for the GUI
 let ctxTab = 1;
 document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 	if (event.key !== 'Enter') {
-		// suggest searches
+		// サジェスト検索
 		try {
 			bare
 				.fetch(`https://duckduckgo.com/ac/?q=${URL_BAR.value}`)
@@ -345,7 +345,7 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 		} catch {}
 		return;
 	}
-	// if user is entering a new URL!
+	// ユーザーが新しいURLを入力した場合
 	URL_BAR.blur();
 	if (URL_BAR.value.startsWith('javascript:')) {
 		try {
@@ -375,7 +375,7 @@ document.querySelector('#urlbar').addEventListener('keydown', (event) => {
 	const result = BingSearchHandler.handleSearch(URL_BAR.value);
 	
 	if (result.isUrl) {
-		
+		// URLの場合は標準処理
 		let value = '//' + location.host + __uv$config.prefix + xor.encode(result.url);
 		document.getElementById(getActiveFrameId()).src = value;
 		addPageToHistory(getActiveFrameId(), value);
